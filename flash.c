@@ -18,6 +18,8 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 
 #define PACKAGE
 #include <bfd.h>
@@ -32,7 +34,7 @@ struct flash_section_data {
 static void flash_section(bfd * ibfd, sec_ptr isection, void *arg)
 {
 	bfd_size_type size = bfd_section_size(isection);
-	bfd_vma vma = bfd_section_vma(isection);
+	//bfd_vma vma = bfd_section_vma(isection);
 	bfd_vma lma = bfd_section_lma(isection);
 	const char *section_name = bfd_section_name(isection);
 	bfd_byte *data = 0;
@@ -86,7 +88,7 @@ static int c2_flash_file(struct c2tool_state *state, const char *filename, const
 
 int handle_flash(struct c2tool_state *state, int argc, char **argv)
 {
-	unsigned char buf[256];
+	//unsigned char buf[256];
 	unsigned int offset = 0;
 	char *end;
 	char *target = NULL;

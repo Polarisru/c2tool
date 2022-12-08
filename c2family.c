@@ -293,7 +293,7 @@ int c2family_find(unsigned int device_id, struct c2family **family)
 
 int c2family_setup(struct c2tool_state *state)
 {
-	struct c2interface *c2if = &state->c2if;
+	//struct c2interface *c2if = &state->c2if;
 	struct c2family *family = state->family;
 	int res;
 	struct c2_setupcmd *setupcmd = family->setup;

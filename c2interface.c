@@ -684,7 +684,7 @@ int c2_flash_erase_device(struct c2tool_state *state)
 int flash_chunk(struct c2tool_state *state, unsigned int addr, unsigned int length,
 		       unsigned char *src)
 {
-	struct c2interface *c2if = &state->c2if;
+	//struct c2interface *c2if = &state->c2if;
 	struct c2family *family = state->family;
 	unsigned int page_size = family->page_size;
 	unsigned int page = addr / page_size;
