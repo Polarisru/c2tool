@@ -18,6 +18,7 @@
 
 #include <stddef.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "c2family.h"
 #include "c2interface.h"

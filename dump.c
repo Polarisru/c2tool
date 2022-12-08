@@ -18,6 +18,7 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "c2family.h"
 #include "c2tool.h"

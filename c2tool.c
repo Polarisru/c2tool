@@ -173,6 +173,8 @@ HIDDEN(dummy2, NULL, NULL);
 int handle_version(struct c2tool_state *state, int argc, char **argv)
 {
 	printf("c2tool version %s\n", c2tool_version);
+
+	return 0;
 }
 
 COMMAND(version, "", handle_version, "Show SW version.");

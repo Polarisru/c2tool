@@ -19,6 +19,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <stdarg.h>
+#include <ctype.h>
 
 #include "hexdump.h"
 
@@ -240,7 +241,7 @@ void print_hex_dump(const char *prefix_str, int prefix_type, unsigned int addr,
 {
 	const unsigned char *ptr = buf;
 	int i, linelen, remaining = len;
-	unsigned char linebuf[32 * 3 + 2 + 32 + 1];
+	char linebuf[32 * 3 + 2 + 32 + 1];
 
 	if (rowsize != 16 && rowsize != 32)
 		rowsize = 16;
