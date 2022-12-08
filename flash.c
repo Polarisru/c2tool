@@ -43,7 +43,7 @@ static void flash_section(bfd * ibfd, sec_ptr isection, void *arg)
 	unsigned int offset = fsdata->offset;
 	unsigned int flash_addr = lma + offset;
 
-	printf("section %s: lma %016" BFD_VMA_FMT "x, size %d -> flash %08x\n",
+	printf("section %s: lma %016" BFD_VMA_FMT "x, size %ld -> flash %08x\n",
 	       section_name, lma, size, flash_addr);
 
 	if (!bfd_get_full_section_contents (ibfd,isection, &data)) {
