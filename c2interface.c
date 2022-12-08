@@ -22,7 +22,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <unistd.h>
-#include <sys/ioctl.h>
+//#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <time.h>
 #include <errno.h>
@@ -248,7 +248,7 @@ static int c2_write_dr(struct c2interface *c2if, unsigned char data)
 	} while (--timeout > 0);
 	if (timeout == 0)
 		return -EIO;
-    
+
 	/* STOP field */
 	c2ck_strobe(c2if);
 

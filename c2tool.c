@@ -19,7 +19,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <net/if.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -101,8 +100,7 @@ static void usage(int argc, char **argv)
 	if (argc > 0)
 		cmd_filt = argv[0];
 
-	printf("Usage:\t%s [options] <gpio c2d> <gpio c2ck> <gpio c2ckstb> command\n", argv0);
-	printf("\tversion\tshow version (%s)\n", c2tool_version);
+	printf("Usage:\t%s <gpio c2d> <gpio c2ck> command\n", argv0);
 	printf("Commands:\n");
 	for_each_cmd(cmd) {
 		if (!cmd->handler || cmd->hidden)
@@ -119,10 +117,10 @@ static void usage_cmd(const struct cmd *cmd)
 	__usage_cmd(cmd, "", true);
 }
 
-static void version(void)
-{
-	printf("c2tool version %s\n", c2tool_version);
-}
+//static void version(void)
+//{
+//	printf("c2tool version %s\n", c2tool_version);
+//}
 
 static int __handle_cmd(struct c2tool_state *state, int argc, char **argv,
 			const struct cmd **cmdout)
@@ -155,7 +153,7 @@ static int __handle_cmd(struct c2tool_state *state, int argc, char **argv,
 
 	if (match)
 		cmd = match;
-	else 
+	else
 		return 1;
 
 	if (cmdout)
@@ -169,29 +167,15 @@ int handle_cmd(struct c2tool_state *state, int argc, char **argv)
 	return __handle_cmd(state, argc, argv, NULL);
 }
 
-/*static int init_gpio(const char* arg)
-{
-	int gpio;
-	int fd;
-	char b[256];
-	char *end;
-
-	gpio = strtol(arg, &end, 10);
-	if (*end)
-		return -1;
-
-	snprintf(b, sizeof(b), "%s%d/value", GPIO_BASE_FILE, gpio);
-	fd = open(b, O_RDWR);
-	if (fd < 0) {
-		fprintf(stderr, "Open %s: %s\n", b, strerror(errno));
-		return -1;
-	}
-
-	return fd;
-}*/
-
 HIDDEN(dummy1, NULL, NULL);
 HIDDEN(dummy2, NULL, NULL);
+
+int handle_version(struct c2tool_state *state, int argc, char **argv)
+{
+	printf("c2tool version %s\n", c2tool_version);
+}
+
+COMMAND(version, "", handle_version, "Show SW version.");
 
 int main(int argc, char **argv)
 {
@@ -206,42 +190,15 @@ int main(int argc, char **argv)
 	argc--;
 	argv0 = *argv++;
 
-	if (argc > 0 && strcmp(*argv, "version") == 0) {
-		version();
-		return 0;
-	}
+//	if (argc > 0 && strcmp(*argv, "version") == 0) {
+//		version();
+//		return 0;
+//	}
 
 	if (argc == 0) {
 		usage(0, NULL);
 		return 1;
 	}
-
-/*	state.c2if.gpio_c2d = init_gpio(*argv);
-	if (state.c2if.gpio_c2d < 0) {
-		usage(0, NULL);
-		printf("Err: c2d\n");
-		return 1;
-	}
-	argc--;
-	argv++;
-
-	state.c2if.gpio_c2ck = init_gpio(*argv);
-	if (state.c2if.gpio_c2ck < 0) {
-		usage(0, NULL);
-		printf("Err: c2ck\n");
-		return 1;
-	}
-	argc--;
-	argv++;
-
-	state.c2if.gpio_c2ckstb = init_gpio(*argv);
-	if (state.c2if.gpio_c2ckstb < 0) {
-		usage(0, NULL);
-		printf("Err: c2ckstb\n");
-		return 1;
-	}
-	argc--;
-	argv++;*/
 
 	if (c2_init() < 0)
 		return 1;
