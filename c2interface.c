@@ -26,6 +26,7 @@
 #include <fcntl.h>
 #include <time.h>
 #include <errno.h>
+#include <pigpio.h>
 
 #include "c2family.h"
 #include "c2interface.h"
@@ -68,6 +69,9 @@
 
 #define GPIO_BASE_FILE "/sys/class/gpio/gpio"
 
+#define GPIO_C2D		23
+#define GPIO_C2CK		24
+
 /*
  * state 0: drive low
  *       1: high-z
@@ -75,47 +79,65 @@
 static void c2d_set(struct c2interface *c2if, int state)
 {
 	if (state)
-		pwrite(c2if->gpio_c2d, "1", 1, 0);
+		gpioWrite(GPIO_C2D, PI_ON);
 	else
-		pwrite(c2if->gpio_c2d, "0", 1, 0);
+		gpioWrite(GPIO_C2D, PI_OFF);
+	usleep(1);
 }
 
 static int c2d_get(struct c2interface *c2if)
 {
-	char buf;
-
-	pread(c2if->gpio_c2d, &buf, 1, 0);
-
-	return buf == '1';
+	//usleep(1);
+	return (gpioRead(GPIO_C2D) == PI_ON);
 }
 
 static void c2ck_set(struct c2interface *c2if, int state)
 {
 	if (state)
-		pwrite(c2if->gpio_c2ck, "1", 1, 0);
+		gpioWrite(GPIO_C2CK, PI_ON);
 	else
-		pwrite(c2if->gpio_c2ck, "0", 1, 0);
+		gpioWrite(GPIO_C2CK, PI_OFF);
+	usleep(1);
 }
 
 static void c2ck_strobe(struct c2interface *c2if)
 {
-	pwrite(c2if->gpio_c2ckstb, "0", 1, 0);
-	pwrite(c2if->gpio_c2ckstb, "1", 1, 0);
+	gpioWrite(GPIO_C2CK, PI_OFF);
+	gpioWrite(GPIO_C2CK, PI_ON);
+	usleep(1);
 }
 
 /*
  * C2 primitives
  */
 
+int c2_init(void)
+{
+	int res = gpioInitialise();
+	if (res >= 0)
+	{
+		gpioSetMode(GPIO_C2CK, PI_OUTPUT);
+		gpioWrite(GPIO_C2CK, PI_ON);
+		gpioSetMode(GPIO_C2D, PI_INPUT);
+		gpioSetPullUpDown(GPIO_C2D, PI_PUD_UP);
+	}
+	return res;
+}
+
+void c2_terminate(void)
+{
+	gpioTerminate();
+}
+
 void c2_reset(struct c2interface *c2if)
 {
+	gpioSetMode(GPIO_C2D, PI_INPUT);
 	/* To reset the device we have to keep clock line low for at least
 	 * 20us.
 	 */
 	c2ck_set(c2if, 0);
 	usleep(25);
 	c2ck_set(c2if, 1);
-
 	usleep(1);
 }
 
@@ -123,6 +145,8 @@ static void c2_write_ar(struct c2interface *c2if, unsigned char addr)
 {
 	int i;
 
+	gpioSetMode(GPIO_C2D, PI_OUTPUT);
+	usleep(1);
 	/* START field */
 	c2d_set(c2if, 1);
 	c2ck_strobe(c2if);
@@ -144,12 +168,16 @@ static void c2_write_ar(struct c2interface *c2if, unsigned char addr)
 	/* STOP field */
 	c2d_set(c2if, 1);
 	c2ck_strobe(c2if);
+	usleep(1);
+	gpioSetMode(GPIO_C2D, PI_INPUT);
 }
 
 static int c2_read_ar(struct c2interface *c2if, unsigned char *addr)
 {
 	int i;
 
+	gpioSetMode(GPIO_C2D, PI_OUTPUT);
+	usleep(1);
 	/* START field */
 	c2d_set(c2if, 1);
 	c2ck_strobe(c2if);
@@ -162,6 +190,7 @@ static int c2_read_ar(struct c2interface *c2if, unsigned char *addr)
 
 	/* ADDRESS field */
 	c2d_set(c2if, 1);
+	gpioSetMode(GPIO_C2D, PI_INPUT);
 	*addr = 0;
 	for (i = 0; i < 8; i++) {
 		*addr >>= 1;	/* shift in 8-bit ADDRESS field LSB first */
@@ -170,7 +199,6 @@ static int c2_read_ar(struct c2interface *c2if, unsigned char *addr)
 		if (c2d_get(c2if))
 			*addr |= 0x80;
 	}
-
 	/* STOP field */
 	c2ck_strobe(c2if);
 
@@ -181,6 +209,8 @@ static int c2_write_dr(struct c2interface *c2if, unsigned char data)
 {
 	int timeout, i;
 
+	gpioSetMode(GPIO_C2D, PI_OUTPUT);
+	usleep(1);
 	/* START field */
 	c2d_set(c2if, 1);
 	c2ck_strobe(c2if);
@@ -207,6 +237,7 @@ static int c2_write_dr(struct c2interface *c2if, unsigned char data)
 
 	/* WAIT field */
 	c2d_set(c2if, 1);
+	gpioSetMode(GPIO_C2D, PI_INPUT);
 	timeout = 20;
 	do {
 		c2ck_strobe(c2if);
@@ -217,7 +248,7 @@ static int c2_write_dr(struct c2interface *c2if, unsigned char data)
 	} while (--timeout > 0);
 	if (timeout == 0)
 		return -EIO;
-
+    
 	/* STOP field */
 	c2ck_strobe(c2if);
 
@@ -228,6 +259,8 @@ static int c2_read_dr(struct c2interface *c2if, unsigned char *data)
 {
 	int timeout, i;
 
+	gpioSetMode(GPIO_C2D, PI_OUTPUT);
+	usleep(1);
 	/* START field */
 	c2d_set(c2if, 1);
 	c2ck_strobe(c2if);
@@ -246,7 +279,8 @@ static int c2_read_dr(struct c2interface *c2if, unsigned char *data)
 
 	/* WAIT field */
 	c2d_set(c2if, 1);
-	timeout = 20;
+	gpioSetMode(GPIO_C2D, PI_INPUT);
+	timeout = 50;
 	do {
 		c2ck_strobe(c2if);
 		if (c2d_get(c2if))
@@ -266,7 +300,6 @@ static int c2_read_dr(struct c2interface *c2if, unsigned char *data)
 		if (c2d_get(c2if))
 			*data |= 0x80;
 	}
-
 	/* STOP field */
 	c2ck_strobe(c2if);
 
@@ -297,7 +330,7 @@ static int c2_poll_in_busy(struct c2interface *c2if)
 static int c2_poll_out_ready(struct c2interface *c2if)
 {
 	unsigned char addr;
-	int ret, timeout = 10000;	/* erase flash needs long time... */
+	int ret, timeout = 100;	/* erase flash needs long time... */
 
 	do {
 		ret = (c2_read_ar(c2if, &addr));

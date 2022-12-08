@@ -18,7 +18,7 @@ CFLAGS    += -Wall
 all: $(EXE)
 
 c2tool: $(OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJ) -lbfd -liberty -ldl -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJ) -lbfd -liberty -lpigpio -ldl -o $@
 
 VERSION_OBJS := $(filter-out version.o, $(OBJS))
 

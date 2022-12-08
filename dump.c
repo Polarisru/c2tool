@@ -29,6 +29,7 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
 	unsigned int offset = 0;
 	unsigned int len = sizeof(buf);
 	char *end;
+	unsigned int errors = 0;
 
 	if (argc) {
 		offset = strtoul(argv[0], &end, 0);
@@ -53,11 +54,18 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
 	while (len) {
 		unsigned int chunk = len > sizeof(buf) ? sizeof(buf) : len;
 
-		c2_flash_read(state, offset, chunk, buf);
-		print_hex_dump("", DUMP_PREFIX_ADDRESS, offset, 16, 1, buf, chunk, 1);
-
-		offset += chunk;
-		len -=chunk;
+		if (c2_flash_read(state, offset, chunk, buf) < 0) {
+			errors++;
+			c2_halt(&state->c2if);
+			if (errors > 5) {
+				return 0;
+			}
+		} else {
+			errors = 0;
+			print_hex_dump("", DUMP_PREFIX_HEX, offset, 16, 1, buf, chunk, 0);
+			offset += chunk;
+			len -=chunk;
+		}
 	}
 
 	return 0;

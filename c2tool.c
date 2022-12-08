@@ -29,8 +29,6 @@
 
 #include "c2tool.h"
 
-#define GPIO_BASE_FILE "/sys/class/gpio/gpio"
-
 static int cmd_size;
 
 extern struct cmd __start___cmd;
@@ -104,7 +102,7 @@ static void usage(int argc, char **argv)
 		cmd_filt = argv[0];
 
 	printf("Usage:\t%s [options] <gpio c2d> <gpio c2ck> <gpio c2ckstb> command\n", argv0);
-	printf("\t--version\tshow version (%s)\n", c2tool_version);
+	printf("\tversion\tshow version (%s)\n", c2tool_version);
 	printf("Commands:\n");
 	for_each_cmd(cmd) {
 		if (!cmd->handler || cmd->hidden)
@@ -171,7 +169,7 @@ int handle_cmd(struct c2tool_state *state, int argc, char **argv)
 	return __handle_cmd(state, argc, argv, NULL);
 }
 
-static int init_gpio(const char* arg)
+/*static int init_gpio(const char* arg)
 {
 	int gpio;
 	int fd;
@@ -190,7 +188,7 @@ static int init_gpio(const char* arg)
 	}
 
 	return fd;
-}
+}*/
 
 HIDDEN(dummy1, NULL, NULL);
 HIDDEN(dummy2, NULL, NULL);
@@ -208,19 +206,20 @@ int main(int argc, char **argv)
 	argc--;
 	argv0 = *argv++;
 
-	if (argc > 0 && strcmp(*argv, "--version") == 0) {
+	if (argc > 0 && strcmp(*argv, "version") == 0) {
 		version();
 		return 0;
 	}
 
-	if (argc < 4) {
+	if (argc == 0) {
 		usage(0, NULL);
 		return 1;
 	}
 
-	state.c2if.gpio_c2d = init_gpio(*argv);
+/*	state.c2if.gpio_c2d = init_gpio(*argv);
 	if (state.c2if.gpio_c2d < 0) {
 		usage(0, NULL);
+		printf("Err: c2d\n");
 		return 1;
 	}
 	argc--;
@@ -229,6 +228,7 @@ int main(int argc, char **argv)
 	state.c2if.gpio_c2ck = init_gpio(*argv);
 	if (state.c2if.gpio_c2ck < 0) {
 		usage(0, NULL);
+		printf("Err: c2ck\n");
 		return 1;
 	}
 	argc--;
@@ -237,10 +237,14 @@ int main(int argc, char **argv)
 	state.c2if.gpio_c2ckstb = init_gpio(*argv);
 	if (state.c2if.gpio_c2ckstb < 0) {
 		usage(0, NULL);
+		printf("Err: c2ckstb\n");
 		return 1;
 	}
 	argc--;
-	argv++;
+	argv++;*/
+
+	if (c2_init() < 0)
+		return 1;
 
 	if (c2_halt(&state.c2if) < 0)
 		return 1;
@@ -262,6 +266,8 @@ int main(int argc, char **argv)
 			usage(0, NULL);
 	} else if (err < 0)
 		fprintf(stderr, "command failed: %s (%d)\n", strerror(-err), err);
+
+	c2_terminate();
 
 	return err ? EXIT_FAILURE : EXIT_SUCCESS;
 }

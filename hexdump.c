@@ -172,18 +172,24 @@ void hex_dump_to_buffer(const void *buf, size_t len, int rowsize,
 		break;
 	}
 
-	default:
+	default: {
+		unsigned char summ = 0;
 		for (j = 0; (j < len) && (lx + 3) <= linebuflen; j++) {
 			ch = ptr[j];
+			summ += ch;
 			linebuf[lx++] = hex_asc_hi(ch);
 			linebuf[lx++] = hex_asc_lo(ch);
-			linebuf[lx++] = ' ';
+			//linebuf[lx++] = ' ';
 		}
+		summ = 0x100 - summ;
+		linebuf[lx++] = hex_asc_hi(summ);
+		linebuf[lx++] = hex_asc_lo(summ);
 		if (j)
 			lx--;
 
 		ascii_column = 3 * rowsize + 2;
 		break;
+	}
 	}
 	if (!ascii)
 		goto nil;
@@ -253,6 +259,9 @@ void print_hex_dump(const char *prefix_str, int prefix_type, unsigned int addr,
 			break;
 		case DUMP_PREFIX_OFFSET:
 			printf("%s%.8x: %s\n", prefix_str, i, linebuf);
+			break;
+		case DUMP_PREFIX_HEX:
+			printf(":%02X%.4x00%s\n", rowsize, addr + i, linebuf);
 			break;
 		default:
 			printf("%s%s\n", prefix_str, linebuf);
