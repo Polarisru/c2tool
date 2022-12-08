@@ -19,6 +19,11 @@ struct c2_pi_info {
 
 struct c2tool_state;
 
+#define FLASH_READ_TIMEOUT_MS			    10
+#define FLASH_WRITE_TIMEOUT_MS			  10
+#define FLASH_PAGE_ERASE_TIMEOUT_MS		40
+#define FLASH_DEVICE_ERASE_TIMEOUT_MS	20000
+
 int c2_init(void);
 void c2_terminate(void);
 void c2_reset(struct c2interface *c2if);

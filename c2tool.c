@@ -1,5 +1,6 @@
 /*
  * Copyright 2014 Dirk Eibach <eibach@gdsys.de>
+ *           2022 Alex Kiselev <a.kiselev@volz-servos.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
