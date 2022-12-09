@@ -98,7 +98,7 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
           return 0;
         }
       } else {
-        memcpy(buf, &fdata[offset], chunk);
+        memcpy(&fdata[offset], buf, chunk);
         errors = 0;
         //print_hex_dump("", DUMP_PREFIX_HEX, offset, 16, 1, buf, chunk, 0);
         offset += chunk;
