@@ -21,16 +21,24 @@
 #include "c2family.h"
 #include "c2tool.h"
 #include "hexdump.h"
+#include "progress.h"
+#include "log.h"
 
 int handle_dump(struct c2tool_state *state, int argc, char **argv)
 {
-	unsigned char buf[256];
-	unsigned int offset = 0;
-	unsigned int len = sizeof(buf);
+	uint8_t buf[256];
+	char *filename;
+	uint32_t offset = 0;
+	uint32_t len = sizeof(buf);
 	char *end;
-	unsigned int errors = 0;
+	uint32_t errors = 0;
+  uint8_t *fdata;
+  FILE *fp;
+  bool res = false;
+  uint16_t pages;
+  uint16_t p_counter;
 
-	if (argc) {
+	if (argc > 1) {
 		offset = strtoul(argv[0], &end, 0);
 		if (*end == '\0') {
 			argv++;
@@ -40,7 +48,7 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
 		}
 	}
 
-	if (argc) {
+	if (argc > 1) {
 		len = strtoul(argv[0], &end, 0);
 		if (*end == '\0') {
 			argv++;
@@ -50,24 +58,53 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
 		}
 	}
 
-	while (len) {
-		unsigned int chunk = len > sizeof(buf) ? sizeof(buf) : len;
-
-		if (c2_flash_read(state, offset, chunk, buf) < 0) {
-			errors++;
-			c2_halt(&state->c2if);
-			if (errors > 5) {
-				return 0;
-			}
-		} else {
-			errors = 0;
-			print_hex_dump("", DUMP_PREFIX_HEX, offset, 16, 1, buf, chunk, 0);
-			offset += chunk;
-			len -=chunk;
-		}
+	if (argc == 1) {
+		filename = argv[0];
+	} else {
+	  return 1;
 	}
+
+  fdata = malloc(FLASH_MAX_LEN);
+  if (!fdata)
+  {
+    LOG_Print(LOG_LEVEL_ERROR, "Unable to allocate %d bytes", (int)len);
+    return false;
+  }
+  memset(fdata, 0xff, len);
+  if ((fp = fopen(filename, "w")) == NULL)
+  {
+    LOG_Print(LOG_LEVEL_ERROR, "Unable to open file: %s", filename);
+  } else
+  {
+    // Find the number of pages
+    pages = len / sizeof(buf);
+    if (len % sizeof(buf) != 0)
+      pages++;
+    p_counter = 0;
+
+    PROGRESS_Print(0, pages, "Reading: ", '#');
+
+    while (len) {
+      uint32_t chunk = len > sizeof(buf) ? sizeof(buf) : len;
+
+      if (c2_flash_read(state, offset, chunk, buf) < 0) {
+        errors++;
+        c2_halt(&state->c2if);
+        if (errors > 5) {
+          return 0;
+        }
+      } else {
+        errors = 0;
+        //print_hex_dump("", DUMP_PREFIX_HEX, offset, 16, 1, buf, chunk, 0);
+        offset += chunk;
+        len -=chunk;
+        p_counter++;
+        PROGRESS_Print(p_counter, pages, "Reading: ", '#');
+      }
+    }
+  }
 
 	return 0;
 }
 
-COMMAND(dump, "[offset] [len]", handle_dump, "Dump flash memory of connected device.");
+COMMAND(dump, "[offset] [len] <file>", handle_dump, "Dump flash memory of connected device to a HEX file.");
