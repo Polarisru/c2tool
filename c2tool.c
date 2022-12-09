@@ -17,16 +17,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <errno.h>
-#include <stdio.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdbool.h>
-#include <stdlib.h>
-
+#include "defines.h"
 #include "c2tool.h"
 
 static int cmd_size;
@@ -117,11 +108,6 @@ static void usage_cmd(const struct cmd *cmd)
 	printf("Usage:\t%s [options] ", argv0);
 	__usage_cmd(cmd, "", true);
 }
-
-//static void version(void)
-//{
-//	printf("c2tool version %s\n", c2tool_version);
-//}
 
 static int __handle_cmd(struct c2tool_state *state, int argc, char **argv,
 			const struct cmd **cmdout)

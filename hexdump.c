@@ -17,11 +17,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stddef.h>
-#include <stdio.h>
-#include <stdarg.h>
-#include <ctype.h>
-
+#include "defines.h"
 #include "hexdump.h"
 
 #define hex_asc_lo(x)	hex_asc[((x) & 0x0f)]

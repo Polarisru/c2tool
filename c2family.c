@@ -17,10 +17,7 @@
  * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include <stddef.h>
-#include <errno.h>
-#include <unistd.h>
-
+#include "defines.h"
 #include "c2family.h"
 #include "c2interface.h"
 #include "c2tool.h"
