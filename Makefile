@@ -10,7 +10,7 @@ RM  = rm -f
 EXE = c2tool
 
 OBJ = c2tool.o c2interface.o c2family.o hexdump.o version.o
-OBJ += info.o dump.o flash.o erase.o verify.o reset.o
+OBJ += info.o dump.o flash.o erase.o verify.o reset.o log.o progress.o ihex.o
 
 CFLAGS    += -Wall
 
@@ -18,7 +18,7 @@ CFLAGS    += -Wall
 all: $(EXE)
 
 c2tool: $(OBJ)
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJ) -lbfd -liberty -lpigpio -ldl -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJ) -liberty -lpigpio -ldl -o $@
 
 VERSION_OBJS := $(filter-out version.o, $(OBJS))
 
