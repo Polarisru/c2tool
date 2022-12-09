@@ -23,6 +23,7 @@
 #include "hexdump.h"
 #include "progress.h"
 #include "log.h"
+#include "ihex.h"
 
 int handle_dump(struct c2tool_state *state, int argc, char **argv)
 {
@@ -37,6 +38,7 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
   bool res = false;
   uint16_t pages;
   uint16_t p_counter;
+  uint32_t f_size;
 
 	if (argc > 1) {
 		offset = strtoul(argv[0], &end, 0);
@@ -82,6 +84,8 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
       pages++;
     p_counter = 0;
 
+    f_size = offset + len;
+
     PROGRESS_Print(0, pages, "Reading: ", '#');
 
     while (len) {
@@ -94,6 +98,7 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
           return 0;
         }
       } else {
+        memcpy(buf, &fdata[offset], chunk);
         errors = 0;
         //print_hex_dump("", DUMP_PREFIX_HEX, offset, 16, 1, buf, chunk, 0);
         offset += chunk;
@@ -101,6 +106,10 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
         p_counter++;
         PROGRESS_Print(p_counter, pages, "Reading: ", '#');
       }
+    }
+    if (IHEX_WriteFile(fp, fdata, f_size) != IHEX_ERROR_NONE)
+    {
+      LOG_Print(LOG_LEVEL_ERROR, "Can not write to file %s", filename);
     }
   }
 

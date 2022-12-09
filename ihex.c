@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
+#include "defines.h"
 #include "ihex.h"
 
 static uint8_t crc;
@@ -46,9 +44,9 @@ bool IHEX_WriteEnd(FILE *fp)
  * \return error code as uint8_t
  *
  */
-uint8_t IHEX_WriteFile(FILE *fp, uint8_t *data, uint16_t len)
+uint8_t IHEX_WriteFile(FILE *fp, uint8_t *data, uint32_t len)
 {
-  uint16_t i;
+  uint32_t i;
   uint8_t x;
   uint8_t width;
   char str[128];
@@ -124,10 +122,10 @@ uint8_t IHEX_GetByte(char *data)
  * \return error code as uint8_t
  *
  */
-uint8_t IHEX_ReadFile(FILE *fp, uint8_t *data, uint16_t maxlen,
-                      uint16_t *min_addr, uint16_t *max_addr)
+uint8_t IHEX_ReadFile(FILE *fp, uint8_t *data, uint32_t maxlen,
+                      uint32_t *min_addr, uint32_t *max_addr)
 {
-  uint16_t addr;
+  uint32_t addr;
   uint8_t len;
   uint8_t type;
   uint16_t segment;
