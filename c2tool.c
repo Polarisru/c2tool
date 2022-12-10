@@ -19,6 +19,7 @@
 
 #include "defines.h"
 #include "c2tool.h"
+#include "log.h"
 
 static int cmd_size;
 
@@ -188,6 +189,8 @@ int main(int argc, char **argv)
 		usage(0, NULL);
 		return 1;
 	}
+
+	LOG_SetLevel(LOG_LEVEL_WARNING);
 
 	if (c2_init() < 0)
 		return 1;
