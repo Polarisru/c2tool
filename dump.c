@@ -89,9 +89,10 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
       } else {
         errors = 0;
         //print_hex_dump("", DUMP_PREFIX_HEX, offset, 16, 1, buf, chunk, 0);
-        if (IHEX_WriteFile(fp, buf, chunk) == false) {
+        if (IHEX_WriteData(fp, buf, chunk) == false) {
           LOG_Print(LOG_LEVEL_ERROR, "Can not write to file %s", filename);
           res = 1;
+          break;
         }
         offset += chunk;
         len -=chunk;
