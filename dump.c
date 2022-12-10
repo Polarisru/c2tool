@@ -35,7 +35,7 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
 	uint32_t errors = 0;
   uint8_t *fdata;
   FILE *fp;
-  bool res = false;
+  int res = 0;
   uint16_t pages;
   uint16_t p_counter;
   uint32_t f_size;
@@ -110,10 +110,11 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
     if (IHEX_WriteFile(fp, fdata, f_size) != IHEX_ERROR_NONE)
     {
       LOG_Print(LOG_LEVEL_ERROR, "Can not write to file %s", filename);
+      res = 1;
     }
   }
 
-	return 0;
+	return res;
 }
 
 COMMAND(dump, "[offset] [len] <file>", handle_dump, "Dump flash memory of connected device to a HEX file.");

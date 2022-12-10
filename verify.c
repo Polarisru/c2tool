@@ -47,7 +47,7 @@ static void verify_section(struct c2tool_state *state, uint32_t flash_addr,
 
 static int c2_verify_file(struct c2tool_state *state, const char *filename)
 {
-
+  return 0;
 }
 
 int handle_verify(struct c2tool_state *state, int argc, char **argv)
