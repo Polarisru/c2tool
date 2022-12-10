@@ -73,6 +73,8 @@
 #define GPIO_C2D		23
 #define GPIO_C2CK		24
 
+static uint16_t c2_poll_out_timeout;
+
 /*
  * state 0: drive low
  *       1: high-z
@@ -328,10 +330,16 @@ static int c2_poll_in_busy(struct c2interface *c2if)
 	return 0;
 }
 
+void c2_set_poll_out_timeout(uint16_t timeout)
+{
+  c2_poll_out_timeout = timeout;
+}
+
 static int c2_poll_out_ready(struct c2interface *c2if)
 {
 	unsigned char addr;
-	int ret, timeout = 100;	/* erase flash needs long time... */
+	/* erase flash needs long time... */
+	int ret, timeout = 100;
 
 	do {
 		ret = (c2_read_ar(c2if, &addr));
@@ -670,13 +678,13 @@ int c2_flash_erase_device(struct c2tool_state *state)
 	if (c2_pi_command(c2if, C2_FPDAT_DEVICE_ERASE, 1, NULL) < 0)
 		return -EIO;
 
-	if (c2_pi_command(c2if, 0xde, 0, NULL) < 0)
+	if (c2_pi_command(c2if, 0xDE, 0, NULL) < 0)
 		return -EIO;
 
-	if (c2_pi_command(c2if, 0xad, 0, NULL) < 0)
+	if (c2_pi_command(c2if, 0xAD, 0, NULL) < 0)
 		return -EIO;
 
-	if (c2_pi_command(c2if, 0xa5, 1, NULL) < 0)
+	if (c2_pi_command(c2if, 0xA5, 1, NULL) < 0)
 		return -EIO;
 
 	return 0;
@@ -711,69 +719,3 @@ int flash_chunk(struct c2tool_state *state, unsigned int addr, unsigned int leng
 
 	return chunk_len;
 }
-
-#if 0
-int main(int argc, char **argv)
-{
-	unsigned char data;
-	int ret;
-
-	unsigned char buf[256];
-
-	if (init_gpio(168 + 13, 168 + 12, 168 + 7))
-		return 1;
-
-	c2_halt();
-
-	/* Select REVID register for C2 data register accesses */
-	c2_write_ar(C2_REVID);
-
-	/* Read and return the revision ID register */
-	ret = c2_read_dr(&data);
-	if (ret < 0)
-		return 1;
-
-	printf("REVID 0x%02x\n", data);
-
-	/* Select DEVID register for C2 data register accesses */
-	c2_write_ar(C2_DEVICEID);
-
-	/* Read and return the device ID register */
-	ret = c2_read_dr(&data);
-	if (ret < 0)
-		return 1;
-
-	printf("DEVID 0x%02x\n", data);
-
-	/* Select FPDAT register for C2 data register accesses */
-	c2_write_ar(0xad);
-
-	ret = c2_pi_command(C2_FPDAT_GET_DERIVATIVE, 1, &data);
-	if (ret < 0)
-		return 1;
-
-	printf("derivative %02x\n", data);
-
-	ret = c2_pi_command(C2_FPDAT_GET_VERSION, 1, &data);
-	if (ret < 0)
-		return 1;
-
-	printf("version %02x\n", data);
-
-	c2_flash_read(0, 256, buf);
-	print_hex_dump("", DUMP_PREFIX_ADDRESS, 0, 16, 1, buf, 256, 1);
-
-	printf("Erase...\n");
-	c2_flash_erase_device();
-
-	c2_flash_read(0, 256, buf);
-	print_hex_dump("", DUMP_PREFIX_ADDRESS, 0, 16, 1, buf, 256, 1);
-
-	flash_file("test.hex", "");
-
-	c2_flash_read(0, 256, buf);
-	print_hex_dump("", DUMP_PREFIX_ADDRESS, 0, 16, 1, buf, 256, 1);
-
-	return 0;
-}
-#endif
