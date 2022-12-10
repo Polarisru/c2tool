@@ -28,41 +28,37 @@ a discrete monoflop should also do.
 
 Dependencies:
 
-* libbfd
-* libiberty
-
-A simple "make" should be sufficient. More Makefile magic is welcome :)
+* libpigpio
 
 ## Prerequisites
 
-Three gpios exported in `/sys/class/gpio` have to be supplied to **c2tool**:
+Two gpios have to be supplied to **c2tool**:
 
 * c2d: Read/write access to the C2 Data pin
 * c2ck: Write access to the  C2 Clock pin
-* c2stb: A falling edge triggers a defined pulse on C2 Clock pin
-
-All gpios must be configured as outputs and set to value 1.
 
 ## Usage
 
 ```
-Usage:  c2tool [options] <gpio c2d> <gpio c2ck> <gpio c2ckstb> command
-        --version       show version (0.01)
+Usage:  c2tool <gpio c2d> <gpio c2ck>  command
 Commands:
+        version       
+                Show SW version.
+
         info
                 Show information about connected device.
 
-        dump [offset] [len]
-                Dump flash memory of connected device.
+        dump [offset] [len] <file>
+                Dump flash memory of connected device to HEX file.
 
-        flash [target <bfdname>] [adjust-start <incr>] <file>
-                Write file to flash memory of connected device.
+        flash <file>
+                Write HEX file to flash memory of connected device.
 
         erase
                 Erase flash memory of connected device.
 
-        verify [target <bfdname>] [adjust-start <incr>] <file>
-                Verify file to flash memory of connected device.
+        verify <file>
+                Verify HEX file to flash memory of connected device.
 
         reset
                 Reset connected device.
@@ -72,4 +68,3 @@ Commands:
 * [C2 Interface Specification](http://www.silabs.com/Support%20Documents/TechnicalDocs/C2spec.pdf)
 * [Silabs Application Note 127](http://www.silabs.com/Support%20Documents/TechnicalDocs/an127.pdf): Fash programming via the C2 interface
 * [AN127 software](http://www.silabs.com/Support%20Documents/Software/AN127SW.zip)
-* Look here for timeouts: https://github.com/x893/C2.Flash
