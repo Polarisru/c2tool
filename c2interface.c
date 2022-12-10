@@ -678,13 +678,13 @@ int c2_flash_erase_device(struct c2tool_state *state)
 	if (c2_pi_command(c2if, C2_FPDAT_DEVICE_ERASE, 1, NULL) < 0)
 		return -EIO;
 
-	if (c2_pi_command(c2if, 0xDE, 0, NULL) < 0)
+	if (c2_pi_write_command(c2if, 0xDE, 0, NULL) < 0)
 		return -EIO;
 
-	if (c2_pi_command(c2if, 0xAD, 0, NULL) < 0)
+	if (c2_pi_write_command(c2if, 0xAD, 0, NULL) < 0)
 		return -EIO;
 
-	if (c2_pi_command(c2if, 0xA5, 1, NULL) < 0)
+	if (c2_pi_write_command(c2if, 0xA5, 1, NULL) < 0)
 		return -EIO;
 
 	return 0;
