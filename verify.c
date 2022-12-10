@@ -42,8 +42,7 @@ static int verify_section(struct c2tool_state *state, uint32_t flash_addr,
 	while (size) {
 		unsigned int chunk = size > sizeof(buf) ? sizeof(buf) : size;
 
-		if (c2_flash_read(state, flash_addr, chunk, buf) < 0)
-		{
+    if (c2_flash_read(state, flash_addr, chunk, buf) < 0) {
       errors++;
       c2_halt(&state->c2if);
       if (errors > 5) {
@@ -106,9 +105,6 @@ int handle_verify(struct c2tool_state *state, int argc, char **argv)
 		filename = argv[0];
 	else
 		return 1;
-
-	if (c2family_setup(state) < 0)
-		return -EIO;
 
 	return c2_verify_file(state, filename);
 }
