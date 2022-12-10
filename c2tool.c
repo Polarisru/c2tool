@@ -180,11 +180,6 @@ int main(int argc, char **argv)
 	argc--;
 	argv0 = *argv++;
 
-//	if (argc > 0 && strcmp(*argv, "version") == 0) {
-//		version();
-//		return 0;
-//	}
-
 	if (argc == 0) {
 		usage(0, NULL);
 		return 1;
