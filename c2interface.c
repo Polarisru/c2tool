@@ -687,6 +687,9 @@ int c2_flash_erase_device(struct c2tool_state *state)
 	if (c2_pi_write_command(c2if, 0xA5) < 0)
 		return -EIO;
 
+  if (c2_pi_check_command(c2if) < 0)
+    return -EIO;
+
 	return 0;
 }
 
