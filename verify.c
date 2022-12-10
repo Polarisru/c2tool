@@ -23,12 +23,13 @@
 #include "progress.h"
 #include "log.h"
 
-static void verify_section(struct c2tool_state *state, uint32_t flash_addr,
+static int verify_section(struct c2tool_state *state, uint32_t flash_addr,
                            uint32_t size, uint8_t *data)
 {
 	unsigned char buf[256];
 	uint16_t p_counter = 0;
 	uint16_t pages;
+	uint32_t errors = 0;
 
   // Find the number of pages
   pages = size / sizeof(buf);
@@ -39,22 +40,30 @@ static void verify_section(struct c2tool_state *state, uint32_t flash_addr,
   PROGRESS_Print(0, pages, "Verifying: ", '#');
 
 	while (size) {
-		int res;
 		unsigned int chunk = size > sizeof(buf) ? sizeof(buf) : size;
 
-		res = c2_flash_read(state, flash_addr, chunk, buf);
-		if (res)
-			return;
-		if (memcmp(&data[flash_addr], buf, chunk) == 0) {
-			LOG_Print(LOG_LEVEL_ERROR, "Failed");
-      break;
-		}
+		if (c2_flash_read(state, flash_addr, chunk, buf) < 0)
+		{
+      errors++;
+      c2_halt(&state->c2if);
+      if (errors > 5) {
+        return 0;
+      }
+    } else {
+      errors = 0;
+      if (memcmp(&data[flash_addr], buf, chunk) != 0) {
+        LOG_Print(LOG_LEVEL_ERROR, "Failed");
+        break;
+      }
 
-		flash_addr += chunk;
-		size -= chunk;
-    p_counter++;
-    PROGRESS_Print(p_counter, pages, "Verifying: ", '#');
+      flash_addr += chunk;
+      size -= chunk;
+      p_counter++;
+      PROGRESS_Print(p_counter, pages, "Verifying: ", '#');
+		}
 	}
+
+	return 0;
 }
 
 static int c2_verify_file(struct c2tool_state *state, const char *filename)
