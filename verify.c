@@ -80,6 +80,7 @@ static int c2_verify_file(struct c2tool_state *state, const char *filename)
   max_addr = 0;
   min_addr = 0;
   IHEX_ReadFile(fp, fdata, FLASH_MAX_LEN, &min_addr, &max_addr);
+  LOG_Print(LOG_LEVEL_WARNING, "File read, start: %d, stop: %d", min_addr, max_addr);
   fclose(fp);
 
   verify_section(state, min_addr, max_addr - min_addr, fdata);
