@@ -47,6 +47,11 @@ static void verify_section(struct c2tool_state *state, uint32_t flash_addr,
 			return;
 		if (memcmp(&data[flash_addr], buf, chunk) != 0) {
 			//printf("verify failed in %d byte chunk at %08x\n", chunk, flash_addr);
+			printf("\n");
+			for (int i = 0; i < 16; i++)
+      {
+        printf("%02X->%02X\n", buf[i], data[flash_addr + i]);
+      }
 			LOG_Print(LOG_LEVEL_ERROR, "Failed");
       break;
 		}
