@@ -33,12 +33,10 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
 	uint32_t len = sizeof(buf);
 	char *end;
 	uint32_t errors = 0;
-  //uint8_t *fdata;
   FILE *fp;
   int res = 0;
   uint16_t pages;
   uint16_t p_counter;
-  uint32_t f_size;
 
 	if (argc > 1) {
 		offset = strtoul(argv[0], &end, 0);
@@ -66,13 +64,6 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
 	  return 1;
 	}
 
-//  fdata = malloc(FLASH_MAX_LEN);
-//  if (!fdata)
-//  {
-//    LOG_Print(LOG_LEVEL_ERROR, "Unable to allocate %d bytes", (int)len);
-//    return false;
-//  }
-  memset(fdata, 0xff, len);
   if ((fp = fopen(filename, "w")) == NULL)
   {
     LOG_Print(LOG_LEVEL_ERROR, "Unable to open file: %s", filename);
@@ -83,8 +74,6 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
     if (len % sizeof(buf) != 0)
       pages++;
     p_counter = 0;
-
-    f_size = offset + len;
 
     PROGRESS_Print(0, pages, "Reading: ", '#');
 
@@ -98,10 +87,12 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
           return 0;
         }
       } else {
-        //memcpy(&fdata[offset], buf, chunk);
         errors = 0;
         //print_hex_dump("", DUMP_PREFIX_HEX, offset, 16, 1, buf, chunk, 0);
-        IHEX_WriteFile(fp, buf, chunk);
+        if (IHEX_WriteFile(fp, buf, chunk) == false) {
+          LOG_Print(LOG_LEVEL_ERROR, "Can not write to file %s", filename);
+          res = 1;
+        }
         offset += chunk;
         len -=chunk;
         p_counter++;
@@ -109,11 +100,7 @@ int handle_dump(struct c2tool_state *state, int argc, char **argv)
       }
     }
     IHEX_WriteEnd(fp);
-//    if (IHEX_WriteFile(fp, fdata, f_size) != IHEX_ERROR_NONE)
-//    {
-//      LOG_Print(LOG_LEVEL_ERROR, "Can not write to file %s", filename);
-//      res = 1;
-//    }
+    fclose(fp);
   }
 
 	return res;

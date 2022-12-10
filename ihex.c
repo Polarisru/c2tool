@@ -14,9 +14,11 @@ static char* IHEX_AddByte(uint8_t byte)
   static char res[3];
 
   crc += byte;
-  uint8_t n = (byte & 0xF0U) >> 4; // high nybble
+  // high nibble
+  uint8_t n = (byte & 0xF0U) >> 4;
   res[0] = IHEX_DIGIT(n);
-  n = byte & 0x0FU; // low nybble
+  // low nibble
+  n = byte & 0x0FU;
   res[1] = IHEX_DIGIT(n);
   res[2] = 0;
 
@@ -54,6 +56,7 @@ bool IHEX_WriteData(FILE *fp, uint8_t *data, uint32_t len)
   crc = 0;
   for (i = 0; i < len; i += IHEX_LINE_LENGTH)
   {
+    // write start symbol
     strcpy(str, IHEX_START);
     // write length
     if (len - i >= IHEX_LINE_LENGTH)
@@ -66,16 +69,20 @@ bool IHEX_WriteData(FILE *fp, uint8_t *data, uint32_t len)
     strcat(str, IHEX_AddByte((uint8_t)i));
     // write type (data)
     strcat(str, IHEX_AddByte(IHEX_DATA_RECORD));
+    // write data
     for (x = 0; x < width; x++)
     {
       strcat(str, IHEX_AddByte(*data++));
     }
     crc = (uint8_t)(0x100 - crc);
+    // write CRC
     strcat(str, IHEX_AddByte(crc));
     strcat(str, IHEX_NEWLINE);
     fwrite(str, strlen(str), 1, fp);
     crc = 0;
   }
+
+  return true;
 }
 
 /** \brief Write data to HEX file

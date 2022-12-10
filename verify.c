@@ -19,11 +19,24 @@
 
 #include "defines.h"
 #include "c2tool.h"
+#include "ihex.h"
+#include "progress.h"
+#include "log.h"
 
 static void verify_section(struct c2tool_state *state, uint32_t flash_addr,
                            uint32_t size, uint8_t *data)
 {
 	unsigned char buf[256];
+	uint16_t p_counter = 0;
+	uint16_t pages;
+
+  // Find the number of pages
+  pages = size / sizeof(buf);
+  if (size % sizeof(buf) != 0)
+    pages++;
+  p_counter = 0;
+
+  PROGRESS_Print(0, pages, "Verifying: ", '#');
 
 	while (size) {
 		int res;
@@ -34,19 +47,44 @@ static void verify_section(struct c2tool_state *state, uint32_t flash_addr,
 			return;
 		if (memcmp(data, buf, chunk)) {
 			//printf("verify failed in %d byte chunk at %08x\n", chunk, flash_addr);
-			//fsdata->errctr++;
+      break;
 		}
 
 		flash_addr += chunk;
 		size -= chunk;
 		data += chunk;
+    p_counter++;
+    PROGRESS_Print(p_counter, pages, "Verifying: ", '#');
 	}
-
-	//printf("section %s: verify ok\n", section_name);
 }
 
 static int c2_verify_file(struct c2tool_state *state, const char *filename)
 {
+  FILE *fp;
+  uint8_t *fdata;
+  //uint8_t errCode;
+  uint32_t max_addr, min_addr;
+
+  fdata = malloc(FLASH_MAX_LEN);
+  if (!fdata)
+  {
+    LOG_Print(LOG_LEVEL_ERROR, "Unable to allocate %d bytes\n", FLASH_MAX_LEN);
+    return false;
+  }
+  if ((fp = fopen(filename, "rt")) == NULL)
+  {
+    LOG_Print(LOG_LEVEL_ERROR, "Unable to open file: %s", filename);
+    free(fdata);
+    return false;
+  }
+  max_addr = 0;
+  min_addr = 0;
+  IHEX_ReadFile(fp, fdata, FLASH_MAX_LEN, &min_addr, &max_addr);
+  fclose(fp);
+
+  verify_section(state, min_addr, max_addr - min_addr, fdata);
+  free(fdata);
+
   return 0;
 }
 
