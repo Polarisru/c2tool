@@ -45,8 +45,9 @@ static void verify_section(struct c2tool_state *state, uint32_t flash_addr,
 		res = c2_flash_read(state, flash_addr, chunk, buf);
 		if (res)
 			return;
-		if (memcmp(data, buf, chunk)) {
+		if (memcmp(&data[flash_addr], buf, chunk) != 0) {
 			//printf("verify failed in %d byte chunk at %08x\n", chunk, flash_addr);
+			LOG_Print(LOG_LEVEL_ERROR, "Failed");
       break;
 		}
 
@@ -79,8 +80,9 @@ static int c2_verify_file(struct c2tool_state *state, const char *filename)
   }
   max_addr = 0;
   min_addr = 0;
-  IHEX_ReadFile(fp, fdata, FLASH_MAX_LEN, &min_addr, &max_addr);
-  LOG_Print(LOG_LEVEL_WARNING, "File read, start: %d, stop: %d", min_addr, max_addr);
+  if (IHEX_ReadFile(fp, fdata, FLASH_MAX_LEN, &min_addr, &max_addr) != IHEX_ERROR_NONE) {
+
+  }
   fclose(fp);
 
   verify_section(state, min_addr, max_addr - min_addr, fdata);
