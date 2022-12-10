@@ -42,11 +42,12 @@ bool IHEX_WriteEnd(FILE *fp)
  *
  * \param [in] fp File handle
  * \param [in] data Data buffer to write
+ * \param [in] start_addr Starting address
  * \param [in] len Length of data buffer
  * \return error code as uint8_t
  *
  */
-bool IHEX_WriteData(FILE *fp, uint8_t *data, uint32_t len)
+bool IHEX_WriteData(FILE *fp, uint8_t *data, uint32_t start_addr, uint32_t len)
 {
   uint32_t i;
   uint8_t x;
@@ -65,8 +66,8 @@ bool IHEX_WriteData(FILE *fp, uint8_t *data, uint32_t len)
       width = (uint8_t)(len - i);
     strcat(str, IHEX_AddByte(width));
     // write address
-    strcat(str, IHEX_AddByte((uint8_t)(i >> 8)));
-    strcat(str, IHEX_AddByte((uint8_t)i));
+    strcat(str, IHEX_AddByte((uint8_t)((start_addr + i) >> 8)));
+    strcat(str, IHEX_AddByte((uint8_t)(start_addr + i)));
     // write type (data)
     strcat(str, IHEX_AddByte(IHEX_DATA_RECORD));
     // write data
@@ -89,13 +90,14 @@ bool IHEX_WriteData(FILE *fp, uint8_t *data, uint32_t len)
  *
  * \param [in] fp File handle
  * \param [in] data Data buffer to write
+ * \param [in] start_addr Starting address
  * \param [in] len Length of data buffer
  * \return error code as uint8_t
  *
  */
-uint8_t IHEX_WriteFile(FILE *fp, uint8_t *data, uint32_t len)
+uint8_t IHEX_WriteFile(FILE *fp, uint8_t *data, uint32_t start_addr, uint32_t len)
 {
-  IHEX_WriteData(fp, data, len);
+  IHEX_WriteData(fp, data, start_addr, len);
 
   IHEX_WriteEnd(fp);
 
