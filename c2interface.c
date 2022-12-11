@@ -545,26 +545,26 @@ int c2_flash_write(struct c2tool_state *state, unsigned int addr, unsigned int l
 		unsigned int k;
 
 		if (c2_pi_command(c2if, C2_FPDAT_BLOCK_WRITE, 1, NULL) < 0)
-			return -EIO;
+			return -1;//-EIO;
 
 		if (c2_pi_command(c2if, addr >> 8, 0, NULL) < 0)
-			return -EIO;
+			return -2;//-EIO;
 		if (c2_pi_command(c2if, addr & 0xff, 0, NULL) < 0)
-			return -EIO;
+			return -3;//-EIO;
 
 		if (length > 255) {
 			if (c2_pi_command(c2if, 0, 1, NULL) < 0)
-				return -EIO;
+				return -4;//-EIO;
 			blocksize = 256;
 		} else {
 			if (c2_pi_command(c2if, length, 1, NULL) < 0)
-				return -EIO;
+				return -6;//-EIO;
 			blocksize = length;
 		}
 
 		for (k = 0; k < blocksize; ++k) {
 			if (c2_pi_command(c2if, *src++, 0, NULL) < 0)
-				return -EIO;
+				return -7;//-EIO;
 		}
 
 		length -= blocksize;
