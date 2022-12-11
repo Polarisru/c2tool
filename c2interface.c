@@ -312,7 +312,7 @@ static int c2_read_dr(struct c2interface *c2if, unsigned char *data)
 static int c2_poll_in_busy(struct c2interface *c2if)
 {
 	unsigned char addr;
-	int ret, timeout = 20;
+	int ret, timeout = 10000;
 
 	do {
 		ret = (c2_read_ar(c2if, &addr));
