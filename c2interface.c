@@ -614,7 +614,7 @@ int c2_halt(struct c2interface *c2if)
 	if (c2_write_dr(c2if, C2_FPCTL_HALT) < 0)
 		return -EIO;
 
-	usleep(20000);
+	usleep(30000);
 
 	return 0;
 }
