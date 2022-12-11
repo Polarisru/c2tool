@@ -24,7 +24,8 @@
 
 int handle_erase(struct c2tool_state *state, int argc, char **argv)
 {
-	return c2_flash_erase_device(state);
+	//return c2_flash_erase_device(state);
+	return c2_flash_erase(state, 0);
 }
 
 COMMAND(erase, NULL, handle_erase, "Erase flash memory of connected device.");

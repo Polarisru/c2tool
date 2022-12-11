@@ -503,7 +503,7 @@ int c2_flash_read(struct c2tool_state *state, unsigned int addr, unsigned int le
 
 		if (c2_pi_command(c2if, addr >> 8, 0, NULL) < 0)
 			return -EIO;
-		if (c2_pi_command(c2if, addr & 0xff, 0, NULL) < 0)
+		if (c2_pi_command(c2if, addr & 0xFF, 0, NULL) < 0)
 			return -EIO;
 
 		if (length > 255) {
