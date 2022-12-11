@@ -312,7 +312,7 @@ static int c2_read_dr(struct c2interface *c2if, unsigned char *data)
 static int c2_poll_in_busy(struct c2interface *c2if)
 {
 	unsigned char addr;
-	int ret, timeout = 10000;
+	int ret, timeout = 20;
 
 	do {
 		ret = (c2_read_ar(c2if, &addr));
@@ -563,7 +563,7 @@ int c2_flash_write(struct c2tool_state *state, unsigned int addr, unsigned int l
 		}
 
 		for (k = 0; k < blocksize; ++k) {
-			if (c2_pi_write_command(c2if, *src++) < 0)
+			if (c2_pi_command(c2if, *src++, 0, NULL) < 0)
 				return -7;//-EIO;
 		}
 
