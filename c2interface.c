@@ -563,7 +563,7 @@ int c2_flash_write(struct c2tool_state *state, unsigned int addr, unsigned int l
 		}
 
 		for (k = 0; k < blocksize; ++k) {
-			if (c2_pi_command(c2if, *src++, 0, NULL) < 0)
+			if (c2_pi_write_command(c2if, *src++) < 0)
 				return -7;//-EIO;
 		}
 
