@@ -590,6 +590,10 @@ int c2_flash_erase(struct c2tool_state *state, unsigned char page)
 	if (c2_pi_command(c2if, 0, 1, NULL) < 0)
 		return -EIO;
 
+  // for F58x, restore PSBANK
+  if (c2_write_sfr(c2if, 0xF5, 0x11) < 0)
+    return -EIO;
+
 	return 0;
 }
 
