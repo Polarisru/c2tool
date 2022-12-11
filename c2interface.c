@@ -532,7 +532,7 @@ int c2_flash_read(struct c2tool_state *state, unsigned int addr, unsigned int le
 	return 0;
 }
 
-static int c2_flash_write(struct c2tool_state *state, unsigned int addr, unsigned int length,
+int c2_flash_write(struct c2tool_state *state, unsigned int addr, unsigned int length,
 			 unsigned char *src)
 {
 	struct c2interface *c2if = &state->c2if;
